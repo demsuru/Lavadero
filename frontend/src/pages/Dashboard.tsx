@@ -50,9 +50,8 @@ export default function Dashboard() {
     setEditModalOpen(true)
   }
 
-  const handleUpdateVehicle = async (data: { assigned_employee_id?: string; entry_timestamp?: string }) => {
-    if (!editTarget) return
-    await updateVehicle(editTarget._id, data)
+  const handleUpdateVehicle = async (vehicleId: string, data: { assigned_employee_id?: string; entry_timestamp?: string }) => {
+    await updateVehicle(vehicleId, data)
   }
 
   const now = new Date()

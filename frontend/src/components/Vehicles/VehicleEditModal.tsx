@@ -10,7 +10,7 @@ import { formatDate } from '../../utils/formatters'
 interface Props {
   open: boolean
   onClose: () => void
-  onSubmit: (data: { assigned_employee_id?: string; entry_timestamp?: string }) => Promise<void>
+  onSubmit: (vehicleId: string, data: { assigned_employee_id?: string; entry_timestamp?: string }) => Promise<void>
   vehicle: Vehicle | null
   employees: Employee[]
 }
@@ -22,7 +22,7 @@ export default function VehicleEditModal({ open, onClose, onSubmit, vehicle, emp
   const [error, setError] = useState('')
 
   useEffect(() => {
-    if (vehicle) {
+    if (vehicle && open) {
       setAssignedEmployeeId(vehicle.assigned_employee_id)
       const date = new Date(vehicle.entry_timestamp)
       setEntryTime(date.toISOString().slice(0, 16))
@@ -34,10 +34,11 @@ export default function VehicleEditModal({ open, onClose, onSubmit, vehicle, emp
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!vehicle) return
     setLoading(true)
     setError('')
     try {
-      await onSubmit({
+      await onSubmit(vehicle._id, {
         assigned_employee_id: assignedEmployeeId,
         entry_timestamp: entryTime ? new Date(entryTime).toISOString() : undefined,
       })
