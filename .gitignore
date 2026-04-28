@@ -60,6 +60,7 @@ Thumbs.db
 .DS_Store
 
 # Miscellaneous
+.claude/
 .agents/
 skills-lock.json
 .cache/
