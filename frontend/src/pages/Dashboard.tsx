@@ -152,8 +152,12 @@ export default function Dashboard() {
 
       <VehicleEditModal
         open={editModalOpen}
-        onClose={() => setEditModalOpen(false)}
+        onClose={() => {
+          setEditModalOpen(false)
+          setEditTarget(null)
+        }}
         onSubmit={handleUpdateVehicle}
+        vehicleId={editTarget?._id}
         vehicle={editTarget}
         employees={employees}
       />

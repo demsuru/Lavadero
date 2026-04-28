@@ -11,11 +11,12 @@ interface Props {
   open: boolean
   onClose: () => void
   onSubmit: (vehicleId: string, data: { assigned_employee_id?: string; entry_timestamp?: string }) => Promise<void>
+  vehicleId?: string
   vehicle: Vehicle | null
   employees: Employee[]
 }
 
-export default function VehicleEditModal({ open, onClose, onSubmit, vehicle, employees }: Props) {
+export default function VehicleEditModal({ open, onClose, onSubmit, vehicleId, vehicle, employees }: Props) {
   const [assignedEmployeeId, setAssignedEmployeeId] = useState('')
   const [entryTime, setEntryTime] = useState('')
   const [loading, setLoading] = useState(false)
@@ -34,11 +35,11 @@ export default function VehicleEditModal({ open, onClose, onSubmit, vehicle, emp
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!vehicle) return
+    if (!vehicleId || !vehicle) return
     setLoading(true)
     setError('')
     try {
-      await onSubmit(vehicle._id, {
+      await onSubmit(vehicleId, {
         assigned_employee_id: assignedEmployeeId,
         entry_timestamp: entryTime ? new Date(entryTime).toISOString() : undefined,
       })
