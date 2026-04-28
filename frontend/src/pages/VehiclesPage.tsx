@@ -19,15 +19,20 @@ export default function VehiclesPage() {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [exitTarget, setExitTarget] = useState<string | null>(null)
   const [exitLoading, setExitLoading] = useState(false)
+  const [exitError, setExitError] = useState<string | null>(null)
 
   const handleConfirmExit = async () => {
     if (!exitTarget) return
     setExitLoading(true)
+    setExitError(null)
     try {
       await exitVehicle(exitTarget)
+      setExitTarget(null)
+    } catch (err) {
+      console.error('Exit vehicle error:', err)
+      setExitError(err instanceof Error ? err.message : 'Error al registrar salida')
     } finally {
       setExitLoading(false)
-      setExitTarget(null)
     }
   }
 
@@ -144,13 +149,13 @@ export default function VehiclesPage() {
 
       <ConfirmDialog
         open={!!exitTarget}
-        onClose={() => setExitTarget(null)}
+        onClose={() => { setExitTarget(null); setExitError(null) }}
         onConfirm={handleConfirmExit}
         title="Registrar salida"
-        description="¿Confirmás la salida de este vehículo? Se generará la transacción automáticamente y no podrá revertirse."
+        description={exitError ? exitError : "¿Confirmás la salida de este vehículo? Se generará la transacción automáticamente y no podrá revertirse."}
         confirmLabel="Confirmar salida"
         loading={exitLoading}
-        variant="warning"
+        variant={exitError ? "danger" : "warning"}
       />
     </div>
   )

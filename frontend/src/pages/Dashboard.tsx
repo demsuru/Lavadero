@@ -17,6 +17,7 @@ export default function Dashboard() {
 
   const [exitTarget, setExitTarget] = useState<string | null>(null)
   const [exitLoading, setExitLoading] = useState(false)
+  const [exitError, setExitError] = useState<string | null>(null)
 
   const completedToday = 0
   const revenueToday = vehicles.reduce((acc, v) => {
@@ -27,11 +28,15 @@ export default function Dashboard() {
   const handleConfirmExit = async () => {
     if (!exitTarget) return
     setExitLoading(true)
+    setExitError(null)
     try {
       await exitVehicle(exitTarget)
+      setExitTarget(null)
+    } catch (err) {
+      console.error('Exit vehicle error:', err)
+      setExitError(err instanceof Error ? err.message : 'Error al registrar salida')
     } finally {
       setExitLoading(false)
-      setExitTarget(null)
     }
   }
 
@@ -132,13 +137,13 @@ export default function Dashboard() {
 
       <ConfirmDialog
         open={!!exitTarget}
-        onClose={() => setExitTarget(null)}
+        onClose={() => { setExitTarget(null); setExitError(null) }}
         onConfirm={handleConfirmExit}
         title="Registrar salida"
-        description="¿Confirmás la salida de este vehículo? Se generará la transacción automáticamente."
+        description={exitError ? exitError : "¿Confirmás la salida de este vehículo? Se generará la transacción automáticamente."}
         confirmLabel="Sí, registrar salida"
         loading={exitLoading}
-        variant="warning"
+        variant={exitError ? "danger" : "warning"}
       />
     </div>
   )
