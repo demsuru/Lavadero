@@ -21,29 +21,34 @@ export default function VehicleEditModal({ open, onClose, onSubmit, vehicleId, v
   const [entryTime, setEntryTime] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [savedVehicleId, setSavedVehicleId] = useState<string | undefined>()
+  const [savedVehicle, setSavedVehicle] = useState<Vehicle | null>(null)
 
   useEffect(() => {
     if (vehicle && open) {
+      setSavedVehicleId(vehicleId)
+      setSavedVehicle(vehicle)
       setAssignedEmployeeId(vehicle.assigned_employee_id)
       const date = new Date(vehicle.entry_timestamp)
       setEntryTime(date.toISOString().slice(0, 16))
     }
     setError('')
-  }, [vehicle, open])
+  }, [vehicle, vehicleId, open])
 
   const activeEmployees = employees.filter(e => e.status === 'active')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!vehicleId || !vehicle) {
-      console.log('Missing vehicleId or vehicle', { vehicleId, vehicle })
+    if (!savedVehicleId || !savedVehicle) {
+      console.log('Missing savedVehicleId or savedVehicle', { savedVehicleId, savedVehicle })
+      setError('Error: No se pudo obtener el ID del vehículo')
       return
     }
     setLoading(true)
     setError('')
     try {
-      console.log('Submitting vehicle update:', { vehicleId, assigned_employee_id: assignedEmployeeId, entryTime })
-      const result = await onSubmit(vehicleId, {
+      console.log('Submitting vehicle update:', { vehicleId: savedVehicleId, assigned_employee_id: assignedEmployeeId, entryTime })
+      const result = await onSubmit(savedVehicleId, {
         assigned_employee_id: assignedEmployeeId,
         entry_timestamp: entryTime ? new Date(entryTime).toISOString() : undefined,
       })
