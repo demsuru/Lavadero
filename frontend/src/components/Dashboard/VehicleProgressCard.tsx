@@ -10,19 +10,23 @@ interface Props {
   employee?: Employee
   washType?: WashType
   onExit: (id: string) => void
+  onEdit?: (vehicle: Vehicle) => void
   exitLoading?: boolean
 }
 
-export default function VehicleProgressCard({ vehicle, employee, washType, onExit, exitLoading }: Props) {
+export default function VehicleProgressCard({ vehicle, employee, washType, onExit, onEdit, exitLoading }: Props) {
   return (
     <div className={clsx(
       'glass-card gradient-border rounded-xl p-5 space-y-4 animate-fade-in',
       'hover:border-blue-primary/30 transition-all duration-300',
       'hover:shadow-[0_4px_32px_rgba(37,99,235,0.12)]'
     )}>
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-3">
+      {/* Header - clickeable */}
+      <button
+        onClick={() => onEdit?.(vehicle)}
+        className="w-full flex items-start justify-between hover:opacity-75 transition-opacity text-left"
+      >
+        <div className="flex items-center gap-3 flex-1">
           <div className="p-2.5 rounded-xl bg-blue-primary/10">
             <Car size={18} className="text-blue-glow" />
           </div>
@@ -32,7 +36,7 @@ export default function VehicleProgressCard({ vehicle, employee, washType, onExi
           </div>
         </div>
         <Badge variant="blue" pulse>En progreso</Badge>
-      </div>
+      </button>
 
       {/* Customer */}
       <div className="space-y-1.5">

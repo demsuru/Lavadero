@@ -62,5 +62,13 @@ class VehicleRepository:
         )
         return _serialize(result) if result else None
 
+    async def update(self, db: AsyncIOMotorDatabase, vehicle_id: str, updates: dict) -> Optional[dict]:
+        result = await self._col(db).find_one_and_update(
+            {"_id": ObjectId(vehicle_id), "status": "in_progress"},
+            {"$set": updates},
+            return_document=True,
+        )
+        return _serialize(result) if result else None
+
 
 vehicle_repository = VehicleRepository()

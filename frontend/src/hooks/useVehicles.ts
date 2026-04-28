@@ -22,12 +22,19 @@ export function useVehiclesInProgress() {
     return updated
   }
 
+  const updateVehicle = async (id: string, updates: { assigned_employee_id?: string; entry_timestamp?: string }) => {
+    const updated = await vehicleService.update(id, updates)
+    await mutate()
+    return updated
+  }
+
   return {
     vehicles: data ?? [],
     isLoading,
     error,
     enterVehicle,
     exitVehicle,
+    updateVehicle,
     refresh: mutate,
   }
 }

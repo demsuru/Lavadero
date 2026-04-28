@@ -101,5 +101,34 @@ class VehicleService:
         except Exception as e:
             raise RuntimeError(f"Error fetching in-progress vehicles: {e}")
 
+    async def update_vehicle(
+        self, db: AsyncSession, mongo_db: AsyncIOMotorDatabase, vehicle_id: str,
+        assigned_employee_id: str | None = None, entry_timestamp: object | None = None
+    ) -> dict:
+        try:
+            updates = {}
+            if assigned_employee_id:
+                employee = await employee_repository.get(db, uuid.UUID(assigned_employee_id))
+                if not employee:
+                    raise ValueError("Employee not found")
+                if employee.status != EmployeeStatus.active:
+                    raise ValueError("Employee is not active")
+                updates["assigned_employee_id"] = assigned_employee_id
+
+            if entry_timestamp:
+                updates["entry_timestamp"] = entry_timestamp
+
+            if not updates:
+                raise ValueError("No fields to update")
+
+            vehicle = await self.repository.update(mongo_db, vehicle_id, updates)
+            if not vehicle:
+                raise ValueError("Vehicle not found or is not in progress")
+            return vehicle
+        except ValueError:
+            raise
+        except Exception as e:
+            raise RuntimeError(f"Error updating vehicle: {e}")
+
 
 vehicle_service = VehicleService()

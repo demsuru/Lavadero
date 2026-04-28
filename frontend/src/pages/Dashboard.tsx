@@ -5,19 +5,24 @@ import { useEmployees } from '../hooks/useEmployees'
 import { useWashTypes } from '../hooks/useWashTypes'
 import StatCard from '../components/Dashboard/StatCard'
 import VehicleProgressCard from '../components/Dashboard/VehicleProgressCard'
+import VehicleEditModal from '../components/Vehicles/VehicleEditModal'
 import ConfirmDialog from '../components/common/ConfirmDialog'
 import SkeletonCard from '../components/common/SkeletonCard'
 import Button from '../components/common/Button'
 import { formatCurrency } from '../utils/formatters'
+import type { Vehicle } from '../types'
 
 export default function Dashboard() {
-  const { vehicles, isLoading, exitVehicle, refresh } = useVehiclesInProgress()
+  const { vehicles, isLoading, exitVehicle, updateVehicle, refresh } = useVehiclesInProgress()
   const { employees } = useEmployees()
   const { washTypes } = useWashTypes()
 
   const [exitTarget, setExitTarget] = useState<string | null>(null)
   const [exitLoading, setExitLoading] = useState(false)
   const [exitError, setExitError] = useState<string | null>(null)
+
+  const [editTarget, setEditTarget] = useState<Vehicle | null>(null)
+  const [editModalOpen, setEditModalOpen] = useState(false)
 
   const completedToday = 0
   const revenueToday = vehicles.reduce((acc, v) => {
@@ -38,6 +43,16 @@ export default function Dashboard() {
     } finally {
       setExitLoading(false)
     }
+  }
+
+  const handleEditVehicle = (vehicle: Vehicle) => {
+    setEditTarget(vehicle)
+    setEditModalOpen(true)
+  }
+
+  const handleUpdateVehicle = async (data: { assigned_employee_id?: string; entry_timestamp?: string }) => {
+    if (!editTarget) return
+    await updateVehicle(editTarget._id, data)
   }
 
   const now = new Date()
@@ -128,12 +143,21 @@ export default function Dashboard() {
                 employee={employees.find(e => e.id === vehicle.assigned_employee_id)}
                 washType={washTypes.find(w => w.id === vehicle.wash_type_id)}
                 onExit={setExitTarget}
+                onEdit={handleEditVehicle}
                 exitLoading={exitLoading && exitTarget === vehicle._id}
               />
             ))}
           </div>
         )}
       </div>
+
+      <VehicleEditModal
+        open={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        onSubmit={handleUpdateVehicle}
+        vehicle={editTarget}
+        employees={employees}
+      />
 
       <ConfirmDialog
         open={!!exitTarget}
