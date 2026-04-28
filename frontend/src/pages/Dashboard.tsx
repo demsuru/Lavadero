@@ -51,7 +51,14 @@ export default function Dashboard() {
   }
 
   const handleUpdateVehicle = async (vehicleId: string, data: { assigned_employee_id?: string; entry_timestamp?: string }) => {
-    await updateVehicle(vehicleId, data)
+    try {
+      console.log('handleUpdateVehicle called:', { vehicleId, data })
+      const result = await updateVehicle(vehicleId, data)
+      console.log('updateVehicle result:', result)
+    } catch (err) {
+      console.error('handleUpdateVehicle error:', err)
+      throw err
+    }
   }
 
   const now = new Date()

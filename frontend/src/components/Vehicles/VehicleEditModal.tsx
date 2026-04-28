@@ -35,16 +35,22 @@ export default function VehicleEditModal({ open, onClose, onSubmit, vehicleId, v
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!vehicleId || !vehicle) return
+    if (!vehicleId || !vehicle) {
+      console.log('Missing vehicleId or vehicle', { vehicleId, vehicle })
+      return
+    }
     setLoading(true)
     setError('')
     try {
-      await onSubmit(vehicleId, {
+      console.log('Submitting vehicle update:', { vehicleId, assigned_employee_id: assignedEmployeeId, entryTime })
+      const result = await onSubmit(vehicleId, {
         assigned_employee_id: assignedEmployeeId,
         entry_timestamp: entryTime ? new Date(entryTime).toISOString() : undefined,
       })
+      console.log('Update result:', result)
       onClose()
     } catch (err) {
+      console.error('Submit error:', err)
       setError(err instanceof Error ? err.message : 'Error al actualizar')
     } finally {
       setLoading(false)
