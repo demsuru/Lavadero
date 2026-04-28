@@ -1,0 +1,128 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  /* Dark Navy Palette */
+  --color-navy-950: #060d1a;
+  --color-navy-900: #0f172a;
+  --color-navy-800: #1e293b;
+  --color-navy-700: #253347;
+  --color-navy-600: #334155;
+  --color-navy-500: #475569;
+  --color-navy-400: #64748b;
+  --color-navy-300: #94a3b8;
+  --color-navy-200: #cbd5e1;
+  --color-navy-100: #e2e8f0;
+  --color-navy-50:  #f1f5f9;
+
+  /* Blue accent */
+  --color-blue-primary: #2563eb;
+  --color-blue-hover:   #1d4ed8;
+  --color-blue-light:   #3b82f6;
+  --color-blue-glow:    #60a5fa;
+  --color-blue-muted:   #1e3a5f;
+  --color-blue-subtle:  #172554;
+
+  /* Status colors */
+  --color-status-green:  #22c55e;
+  --color-status-yellow: #eab308;
+  --color-status-red:    #ef4444;
+  --color-status-blue:   #60a5fa;
+  --color-status-gray:   #64748b;
+
+  --font-sans: 'Inter', system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #0f172a;
+  color: #f1f5f9;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #0f172a; }
+::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+/* ── Animations ─────────────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(100%); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideOutRight {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(100%); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 8px rgba(37, 99, 235, 0.35); }
+  50%       { box-shadow: 0 0 22px rgba(37, 99, 235, 0.75); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-fade-in         { animation: fadeIn 0.3s ease-out forwards; }
+.animate-slide-in-right  { animation: slideInRight 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.animate-slide-out-right { animation: slideOutRight 0.3s ease-in forwards; }
+.animate-pulse-glow      { animation: pulseGlow 2.5s ease-in-out infinite; }
+
+/* ── Skeleton loader ─────────────────────────────────────── */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #1e293b 25%,
+    #253347 50%,
+    #1e293b 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 6px;
+}
+
+/* ── Glassmorphism card ──────────────────────────────────── */
+.glass-card {
+  background: rgba(30, 41, 59, 0.65);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(96, 165, 250, 0.12);
+}
+
+/* ── Gradient border ─────────────────────────────────────── */
+.gradient-border {
+  position: relative;
+  border-radius: inherit;
+}
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(37,99,235,0.55), rgba(96,165,250,0.1));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
