@@ -17,7 +17,8 @@ export function useVehiclesInProgress() {
 
   const exitVehicle = async (id: string) => {
     const updated = await vehicleService.registerExit(id)
-    mutate()
+    // Revalidate to fetch fresh list (will exclude completed vehicles)
+    await mutate()
     return updated
   }
 
