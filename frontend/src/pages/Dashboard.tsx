@@ -3,6 +3,7 @@ import { Car, CheckCircle, DollarSign, Users, RefreshCw } from 'lucide-react'
 import { useVehiclesInProgress } from '../hooks/useVehicles'
 import { useAvailableEmployees } from '../hooks/useEmployees'
 import { useWashTypes } from '../hooks/useWashTypes'
+import { useDashboardTodayStats } from '../hooks/useDashboard'
 import StatCard from '../components/Dashboard/StatCard'
 import VehicleProgressCard from '../components/Dashboard/VehicleProgressCard'
 import VehicleEditModal from '../components/Vehicles/VehicleEditModal'
@@ -16,6 +17,7 @@ export default function Dashboard() {
   const { vehicles, isLoading, exitVehicle, updateVehicle, refresh } = useVehiclesInProgress()
   const { employees } = useAvailableEmployees()
   const { washTypes } = useWashTypes()
+  const { completedCount, revenueToday, refresh: refreshDashboard } = useDashboardTodayStats()
 
   const [exitTarget, setExitTarget] = useState<string | null>(null)
   const [exitLoading, setExitLoading] = useState(false)
@@ -24,12 +26,6 @@ export default function Dashboard() {
   const [editTarget, setEditTarget] = useState<Vehicle | null>(null)
   const [editModalOpen, setEditModalOpen] = useState(false)
 
-  const completedToday = 0
-  const revenueToday = vehicles.reduce((acc, v) => {
-    const wt = washTypes.find(w => w.id === v.wash_type_id)
-    return acc + (wt?.price ?? 0)
-  }, 0)
-
   const handleConfirmExit = async () => {
     if (!exitTarget) return
     setExitLoading(true)
@@ -37,6 +33,7 @@ export default function Dashboard() {
     try {
       await exitVehicle(exitTarget)
       setExitTarget(null)
+      refreshDashboard()
     } catch (err) {
       console.error('Exit vehicle error:', err)
       setExitError(err instanceof Error ? err.message : 'Error al registrar salida')
@@ -96,7 +93,7 @@ export default function Dashboard() {
         />
         <StatCard
           label="Completados hoy"
-          value={completedToday}
+          value={completedCount}
           icon={<CheckCircle size={20} />}
           color="green"
           subtitle="lavados terminados"
