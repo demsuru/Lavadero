@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Car, CheckCircle, DollarSign, Users, RefreshCw } from 'lucide-react'
 import { useVehiclesInProgress } from '../hooks/useVehicles'
-import { useEmployees } from '../hooks/useEmployees'
+import { useAvailableEmployees } from '../hooks/useEmployees'
 import { useWashTypes } from '../hooks/useWashTypes'
 import StatCard from '../components/Dashboard/StatCard'
 import VehicleProgressCard from '../components/Dashboard/VehicleProgressCard'
@@ -14,7 +14,7 @@ import type { Vehicle } from '../types'
 
 export default function Dashboard() {
   const { vehicles, isLoading, exitVehicle, updateVehicle, refresh } = useVehiclesInProgress()
-  const { employees } = useEmployees()
+  const { employees } = useAvailableEmployees()
   const { washTypes } = useWashTypes()
 
   const [exitTarget, setExitTarget] = useState<string | null>(null)
@@ -144,13 +144,13 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {vehicles.map(vehicle => (
               <VehicleProgressCard
-                key={vehicle._id}
+                key={vehicle.id}
                 vehicle={vehicle}
                 employee={employees.find(e => e.id === vehicle.assigned_employee_id)}
                 washType={washTypes.find(w => w.id === vehicle.wash_type_id)}
-                onExit={setExitTarget}
+                onExit={(id) => setExitTarget(id)}
                 onEdit={handleEditVehicle}
-                exitLoading={exitLoading && exitTarget === vehicle._id}
+                exitLoading={exitLoading && exitTarget === vehicle.id}
               />
             ))}
           </div>
@@ -164,7 +164,7 @@ export default function Dashboard() {
           setEditTarget(null)
         }}
         onSubmit={handleUpdateVehicle}
-        vehicleId={editTarget?._id}
+        vehicleId={editTarget?.id}
         vehicle={editTarget}
         employees={employees}
       />

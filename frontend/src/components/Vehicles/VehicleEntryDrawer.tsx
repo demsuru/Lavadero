@@ -54,6 +54,9 @@ export default function VehicleEntryDrawer({ open, onClose, onSubmit, employees,
       })
       setForm(empty)
       onClose()
+    } catch (err) {
+      console.error('Vehicle entry error:', err)
+      setErrors({ plate: err instanceof Error ? err.message : 'Error registrando entrada' })
     } finally {
       setLoading(false)
     }
@@ -169,11 +172,11 @@ export default function VehicleEntryDrawer({ open, onClose, onSubmit, employees,
             Cancelar
           </Button>
           <Button
+            type="submit"
             variant="primary"
             className="flex-1 justify-center"
             icon={<Plus size={15} />}
             loading={loading}
-            onClick={(e) => handleSubmit(e as any)}
           >
             Registrar entrada
           </Button>

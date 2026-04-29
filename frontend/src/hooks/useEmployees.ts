@@ -1,4 +1,4 @@
-import useSWR from 'swr'
+import useSWR, { useSWRConfig } from 'swr'
 import { employeeService } from '../services/employeeService'
 import type { EmployeeCreate, EmployeeUpdate } from '../types'
 
@@ -34,8 +34,13 @@ export function useEmployees() {
 }
 
 export function useAvailableEmployees() {
-  const { data, error, isLoading } = useSWR('employees/available', employeeService.getAvailable, {
+  const { data, error, isLoading, mutate } = useSWR('employees/available', employeeService.getAvailable, {
     refreshInterval: 60_000,
   })
-  return { employees: data ?? [], isLoading, error }
+  return { employees: data ?? [], isLoading, error, mutate }
+}
+
+export function useInvalidateAvailableEmployees() {
+  const { mutate } = useSWRConfig()
+  return () => mutate('employees/available')
 }

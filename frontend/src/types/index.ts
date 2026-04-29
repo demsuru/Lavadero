@@ -71,7 +71,7 @@ export interface WashTypeUpdate {
 }
 
 export interface Vehicle {
-  _id: string
+  id: string
   plate: string
   brand: string
   customer_name: string

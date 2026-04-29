@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Plus, Car, LogOut, Clock, User } from 'lucide-react'
 import { useVehiclesInProgress } from '../hooks/useVehicles'
-import { useEmployees } from '../hooks/useEmployees'
+import { useAvailableEmployees } from '../hooks/useEmployees'
 import { useWashTypes } from '../hooks/useWashTypes'
 import VehicleEntryDrawer from '../components/Vehicles/VehicleEntryDrawer'
 import ConfirmDialog from '../components/common/ConfirmDialog'
@@ -13,7 +13,7 @@ import clsx from 'clsx'
 
 export default function VehiclesPage() {
   const { vehicles, isLoading, enterVehicle, exitVehicle } = useVehiclesInProgress()
-  const { employees } = useEmployees()
+  const { employees } = useAvailableEmployees()
   const { washTypes } = useWashTypes()
 
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -74,7 +74,7 @@ export default function VehiclesPage() {
             const washType = washTypes.find(w => w.id === vehicle.wash_type_id)
             return (
               <div
-                key={vehicle._id}
+                key={vehicle.id}
                 className={clsx(
                   'glass-card gradient-border rounded-xl p-5 space-y-4',
                   'hover:shadow-[0_4px_32px_rgba(37,99,235,0.12)] transition-all duration-300'
@@ -129,7 +129,7 @@ export default function VehiclesPage() {
                   size="sm"
                   className="w-full justify-center hover:bg-status-green/10 hover:border-status-green/30 hover:text-status-green"
                   icon={<LogOut size={14} />}
-                  onClick={() => setExitTarget(vehicle._id)}
+                  onClick={() => setExitTarget(vehicle.id)}
                 >
                   Registrar salida
                 </Button>

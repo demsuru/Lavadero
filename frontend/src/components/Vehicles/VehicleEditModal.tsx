@@ -1,11 +1,8 @@
 import { useState, useEffect } from 'react'
-import { Clock, User } from 'lucide-react'
 import Modal from '../common/Modal'
 import { FormInput, FormSelect } from '../common/FormInput'
 import Button from '../common/Button'
-import Badge from '../common/Badge'
 import type { Vehicle, Employee } from '../../types'
-import { formatDate } from '../../utils/formatters'
 
 interface Props {
   open: boolean
