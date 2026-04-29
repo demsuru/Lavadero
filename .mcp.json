@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "chromium": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-chromium"
+      ],
+      "env": {
+        "BROWSER_HEADLESS": "false"
+      },
+      "description": "Chromium browser control via Chrome DevTools Protocol"
+    }
+  }
+}

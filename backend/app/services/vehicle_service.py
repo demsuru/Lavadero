@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, date
 from sqlalchemy.ext.asyncio import AsyncSession
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from app.models.employee import EmployeeStatus
@@ -129,6 +129,14 @@ class VehicleService:
             raise
         except Exception as e:
             raise RuntimeError(f"Error updating vehicle: {e}")
+
+    async def get_completed_today(self, mongo_db: AsyncIOMotorDatabase, target_date: date | None = None) -> list[dict]:
+        try:
+            if target_date is None:
+                target_date = datetime.now().date()
+            return await self.repository.get_completed_today(mongo_db, target_date)
+        except Exception as e:
+            raise RuntimeError(f"Error fetching completed vehicles: {e}")
 
 
 vehicle_service = VehicleService()

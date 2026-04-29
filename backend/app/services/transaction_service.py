@@ -1,5 +1,5 @@
 import uuid
-from datetime import date
+from datetime import date, datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.transaction import Transaction
 from app.repositories.transaction_repository import transaction_repository
@@ -31,6 +31,15 @@ class TransactionService:
             return await self.repository.get_by_date(db, target_date)
         except Exception as e:
             raise RuntimeError(f"Error fetching transactions by date: {e}")
+
+    async def get_today_revenue(self, db: AsyncSession, target_date: date | None = None) -> float:
+        try:
+            if target_date is None:
+                target_date = datetime.now().date()
+            transactions = await self.repository.get_by_date(db, target_date)
+            return sum(t.amount for t in transactions)
+        except Exception as e:
+            raise RuntimeError(f"Error calculating today's revenue: {e}")
 
 
 transaction_service = TransactionService()

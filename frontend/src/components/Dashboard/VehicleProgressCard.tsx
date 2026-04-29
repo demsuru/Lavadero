@@ -75,7 +75,7 @@ export default function VehicleProgressCard({ vehicle, employee, washType, onExi
         className="w-full justify-center hover:bg-status-green/10 hover:border-status-green/30 hover:text-status-green"
         icon={<LogOut size={14} />}
         loading={exitLoading}
-        onClick={() => onExit(vehicle._id)}
+        onClick={() => onExit(vehicle.id)}
       >
         Registrar salida
       </Button>

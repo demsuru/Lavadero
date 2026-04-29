@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date
 from typing import Optional
 from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorDatabase
@@ -69,6 +69,17 @@ class VehicleRepository:
             return_document=True,
         )
         return _serialize(result) if result else None
+
+    async def get_completed_today(self, db: AsyncIOMotorDatabase, target_date: date) -> list[dict]:
+        """Get all completed vehicles for a specific date."""
+        start_of_day = datetime.combine(target_date, datetime.min.time()).replace(tzinfo=timezone.utc)
+        end_of_day = datetime.combine(target_date, datetime.max.time()).replace(tzinfo=timezone.utc)
+
+        cursor = self._col(db).find({
+            "status": "completed",
+            "exit_timestamp": {"$gte": start_of_day, "$lte": end_of_day}
+        })
+        return [_serialize(doc) async for doc in cursor]
 
 
 vehicle_repository = VehicleRepository()
