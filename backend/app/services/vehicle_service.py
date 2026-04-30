@@ -1,10 +1,9 @@
 import uuid
-from datetime import datetime, date
+from datetime import date
 from sqlalchemy.ext.asyncio import AsyncSession
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from app.models.employee import EmployeeStatus
 from app.models.wash_type import WashTypeStatus
-from app.models.shift import DayOfWeek
 from app.schemas.vehicle import VehicleCreate
 from app.repositories.vehicle_repository import vehicle_repository
 from app.repositories.employee_repository import employee_repository
@@ -29,9 +28,7 @@ class VehicleService:
             if employee.status != EmployeeStatus.active:
                 raise ValueError("Employee is not active")
 
-            today_name = datetime.now().strftime("%A").lower()
-            today = DayOfWeek(today_name)
-            available = await employee_repository.get_available_today(db, today)
+            available = await employee_repository.get_available_today(db, date.today())
             if not any(e.id == employee_id for e in available):
                 raise ValueError("Employee does not have a shift today")
 

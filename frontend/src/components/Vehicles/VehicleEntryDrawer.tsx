@@ -99,88 +99,90 @@ export default function VehicleEntryDrawer({ open, onClose, onSubmit, employees,
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-5 py-5 space-y-4">
-          <div className="grid grid-cols-2 gap-3">
+        <form onSubmit={handleSubmit} className="flex flex-col h-full">
+          <div className="flex-1 overflow-y-auto px-5 py-5 space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <FormInput
+                label="Patente"
+                placeholder="ABC123"
+                value={form.plate}
+                onChange={set('plate')}
+                error={errors.plate}
+                className="uppercase"
+              />
+              <FormInput
+                label="Marca"
+                placeholder="Toyota"
+                value={form.brand}
+                onChange={set('brand')}
+                error={errors.brand}
+              />
+            </div>
+
             <FormInput
-              label="Patente"
-              placeholder="ABC123"
-              value={form.plate}
-              onChange={set('plate')}
-              error={errors.plate}
-              className="uppercase"
+              label="Nombre del cliente"
+              placeholder="Juan Pérez"
+              value={form.customer_name}
+              onChange={set('customer_name')}
+              error={errors.customer_name}
             />
+
             <FormInput
-              label="Marca"
-              placeholder="Toyota"
-              value={form.brand}
-              onChange={set('brand')}
-              error={errors.brand}
+              label="Teléfono (opcional)"
+              placeholder="+54 9 11 1234-5678"
+              value={form.customer_phone ?? ''}
+              onChange={set('customer_phone')}
+              type="tel"
+            />
+
+            <FormSelect
+              label="Empleado asignado"
+              value={form.assigned_employee_id}
+              onChange={set('assigned_employee_id')}
+              error={errors.assigned_employee_id}
+            >
+              <option value="">— Seleccioná un empleado —</option>
+              {activeEmployees.map(e => (
+                <option key={e.id} value={e.id}>{e.name}</option>
+              ))}
+            </FormSelect>
+
+            <FormSelect
+              label="Tipo de lavado"
+              value={form.wash_type_id}
+              onChange={set('wash_type_id')}
+              error={errors.wash_type_id}
+            >
+              <option value="">— Seleccioná el tipo —</option>
+              {activeWashTypes.map(w => (
+                <option key={w.id} value={w.id}>{w.name} — ${w.price.toLocaleString('es-AR')}</option>
+              ))}
+            </FormSelect>
+
+            <FormTextarea
+              label="Notas (opcional)"
+              placeholder="Observaciones sobre el vehículo..."
+              value={form.notes ?? ''}
+              onChange={set('notes')}
             />
           </div>
 
-          <FormInput
-            label="Nombre del cliente"
-            placeholder="Juan Pérez"
-            value={form.customer_name}
-            onChange={set('customer_name')}
-            error={errors.customer_name}
-          />
-
-          <FormInput
-            label="Teléfono (opcional)"
-            placeholder="+54 9 11 1234-5678"
-            value={form.customer_phone ?? ''}
-            onChange={set('customer_phone')}
-            type="tel"
-          />
-
-          <FormSelect
-            label="Empleado asignado"
-            value={form.assigned_employee_id}
-            onChange={set('assigned_employee_id')}
-            error={errors.assigned_employee_id}
-          >
-            <option value="">— Seleccioná un empleado —</option>
-            {activeEmployees.map(e => (
-              <option key={e.id} value={e.id}>{e.name}</option>
-            ))}
-          </FormSelect>
-
-          <FormSelect
-            label="Tipo de lavado"
-            value={form.wash_type_id}
-            onChange={set('wash_type_id')}
-            error={errors.wash_type_id}
-          >
-            <option value="">— Seleccioná el tipo —</option>
-            {activeWashTypes.map(w => (
-              <option key={w.id} value={w.id}>{w.name} — ${w.price.toLocaleString('es-AR')}</option>
-            ))}
-          </FormSelect>
-
-          <FormTextarea
-            label="Notas (opcional)"
-            placeholder="Observaciones sobre el vehículo..."
-            value={form.notes ?? ''}
-            onChange={set('notes')}
-          />
+          {/* Footer */}
+          <div className="px-5 py-4 border-t border-navy-800 flex gap-2">
+            <Button variant="secondary" className="flex-1 justify-center" onClick={onClose}>
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              className="flex-1 justify-center"
+              icon={<Plus size={15} />}
+              loading={loading}
+            >
+              Registrar entrada
+            </Button>
+          </div>
         </form>
-
-        {/* Footer */}
-        <div className="px-5 py-4 border-t border-navy-800 flex gap-2">
-          <Button variant="secondary" className="flex-1 justify-center" onClick={onClose}>
-            Cancelar
-          </Button>
-          <Button
-            type="submit"
-            variant="primary"
-            className="flex-1 justify-center"
-            icon={<Plus size={15} />}
-            loading={loading}
-          >
-            Registrar entrada
-          </Button>
-        </div>
       </div>
     </>
   )

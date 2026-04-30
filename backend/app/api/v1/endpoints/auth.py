@@ -12,10 +12,18 @@ router = APIRouter()
 @router.post("/login", response_model=TokenResponse)
 async def login(data: LoginRequest, db: AsyncSession = Depends(get_db)):
     try:
+        print(f"[LOGIN DEBUG] Email: {data.email}, Password length: {len(data.password)}, Password: {data.password}")
         return await auth_service.login(db, data.email, data.password)
     except ValueError as e:
+        print(f"[LOGIN DEBUG] ValueError: {str(e)}")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
     except RuntimeError as e:
+        print(f"[LOGIN DEBUG] RuntimeError: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        print(f"[LOGIN DEBUG] Unexpected error: {type(e).__name__}: {str(e)}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 

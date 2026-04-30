@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { Car, CheckCircle, DollarSign, Users, RefreshCw } from 'lucide-react'
+import { Car, CheckCircle, DollarSign, Users, RefreshCw, Plus } from 'lucide-react'
 import { useVehiclesInProgress } from '../hooks/useVehicles'
 import { useAvailableEmployees } from '../hooks/useEmployees'
 import { useWashTypes } from '../hooks/useWashTypes'
 import { useDashboardTodayStats } from '../hooks/useDashboard'
 import StatCard from '../components/Dashboard/StatCard'
 import VehicleProgressCard from '../components/Dashboard/VehicleProgressCard'
+import VehicleEntryDrawer from '../components/Vehicles/VehicleEntryDrawer'
 import VehicleEditModal from '../components/Vehicles/VehicleEditModal'
 import ConfirmDialog from '../components/common/ConfirmDialog'
 import SkeletonCard from '../components/common/SkeletonCard'
@@ -14,11 +15,12 @@ import { formatCurrency } from '../utils/formatters'
 import type { Vehicle } from '../types'
 
 export default function Dashboard() {
-  const { vehicles, isLoading, exitVehicle, updateVehicle, refresh } = useVehiclesInProgress()
+  const { vehicles, isLoading, enterVehicle, exitVehicle, updateVehicle, refresh } = useVehiclesInProgress()
   const { employees } = useAvailableEmployees()
   const { washTypes } = useWashTypes()
   const { completedCount, revenueToday, refresh: refreshDashboard } = useDashboardTodayStats()
 
+  const [entryDrawerOpen, setEntryDrawerOpen] = useState(false)
   const [exitTarget, setExitTarget] = useState<string | null>(null)
   const [exitLoading, setExitLoading] = useState(false)
   const [exitError, setExitError] = useState<string | null>(null)
@@ -72,14 +74,22 @@ export default function Dashboard() {
             {now.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}
           </p>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          icon={<RefreshCw size={14} />}
-          onClick={() => refresh()}
-        >
-          Actualizar
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            icon={<Plus size={14} />}
+            onClick={() => setEntryDrawerOpen(true)}
+          >
+            Nueva entrada
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={<RefreshCw size={14} />}
+            onClick={() => refresh()}
+          >
+            Actualizar
+          </Button>
+        </div>
       </div>
 
       {/* Stats */}
@@ -153,6 +163,18 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+
+      <VehicleEntryDrawer
+        open={entryDrawerOpen}
+        onClose={() => setEntryDrawerOpen(false)}
+        onSubmit={async (data) => {
+          await enterVehicle(data)
+          setEntryDrawerOpen(false)
+          refreshDashboard()
+        }}
+        employees={employees}
+        washTypes={washTypes}
+      />
 
       <VehicleEditModal
         open={editModalOpen}

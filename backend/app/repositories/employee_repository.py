@@ -1,9 +1,10 @@
 import uuid
+from datetime import date
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, exists
 from app.models.employee import Employee, EmployeeStatus
-from app.models.shift import Shift, DayOfWeek
+from app.models.shift import Shift
 from app.schemas.employee import EmployeeCreate, EmployeeUpdate
 from app.repositories.base_repository import BaseRepository
 
@@ -19,15 +20,18 @@ class EmployeeRepository(BaseRepository[Employee, EmployeeCreate, EmployeeUpdate
         )
         return list(result.scalars().all())
 
-    async def get_available_today(self, db: AsyncSession, today: DayOfWeek) -> list[Employee]:
-        """Return active employees who have a shift on the given day."""
+    async def get_available_today(self, db: AsyncSession, target_date: date | None = None) -> list[Employee]:
+        """Return active employees who have a shift on the given date."""
+        if target_date is None:
+            target_date = date.today()
+
         result = await db.execute(
             select(Employee)
             .where(Employee.status == EmployeeStatus.active)
             .where(
                 exists().where(
                     Shift.employee_id == Employee.id,
-                    Shift.day_of_week == today,
+                    Shift.shift_date == target_date,
                 )
             )
         )

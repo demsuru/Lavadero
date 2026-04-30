@@ -81,5 +81,20 @@ class VehicleRepository:
         })
         return [_serialize(doc) async for doc in cursor]
 
+    async def search(self, db: AsyncIOMotorDatabase, plate: Optional[str] = None, date_from: Optional[date] = None, date_to: Optional[date] = None) -> list[dict]:
+        """Search vehicles by plate or date range."""
+        query = {}
+
+        if plate:
+            query["plate"] = {"$regex": plate.upper(), "$options": "i"}
+
+        if date_from and date_to:
+            start_of_day = datetime.combine(date_from, datetime.min.time()).replace(tzinfo=timezone.utc)
+            end_of_day = datetime.combine(date_to, datetime.max.time()).replace(tzinfo=timezone.utc)
+            query["entry_timestamp"] = {"$gte": start_of_day, "$lte": end_of_day}
+
+        cursor = self._col(db).find(query) if query else self._col(db).find({})
+        return [_serialize(doc) async for doc in cursor]
+
 
 vehicle_repository = VehicleRepository()

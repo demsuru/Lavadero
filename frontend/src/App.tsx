@@ -4,10 +4,10 @@ import ProtectedRoute from './components/common/ProtectedRoute'
 import Layout from './pages/Layout'
 import LoginPage from './pages/LoginPage'
 import Dashboard from './pages/Dashboard'
-import VehiclesPage from './pages/VehiclesPage'
 import EmployeesPage from './pages/EmployeesPage'
 import ShiftsPage from './pages/ShiftsPage'
 import WashTypesPage from './pages/WashTypesPage'
+import ReportsPage from './pages/ReportsPage'
 
 export default function App() {
   return (
@@ -24,10 +24,17 @@ export default function App() {
             }
           >
             <Route index element={<Dashboard />} />
-            <Route path="vehicles" element={<VehiclesPage />} />
             <Route path="employees" element={<EmployeesPage />} />
             <Route path="shifts" element={<ShiftsPage />} />
             <Route path="wash-types" element={<WashTypesPage />} />
+            <Route
+              path="reports"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'superadmin']}>
+                  <ReportsPage />
+                </ProtectedRoute>
+              }
+            />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

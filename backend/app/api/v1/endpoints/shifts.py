@@ -1,4 +1,5 @@
 import uuid
+from datetime import date
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,10 +15,13 @@ router = APIRouter()
 async def list_shifts(
     skip: int = 0,
     limit: int = 100,
+    week_of: date | None = None,
     db: AsyncSession = Depends(get_db),
     _: Employee = Depends(require_manager_or_above),
 ):
     try:
+        if week_of:
+            return await shift_service.get_shifts_for_week(db, week_of)
         return await shift_service.list_shifts(db, skip=skip, limit=limit)
     except RuntimeError as e:
         raise HTTPException(status_code=500, detail=str(e))
