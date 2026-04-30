@@ -41,6 +41,19 @@ export function useEmployeeStats(startDate: string, endDate: string) {
   }
 }
 
+export function useRecentVehicles(startDate: string, endDate: string) {
+  const { data, error, isLoading } = useSWR(
+    startDate && endDate ? ['reports/vehicles/recent', startDate, endDate] : null,
+    ([_, start, end]) => reportsService.searchVehicles(undefined, start, end).then(vehicles => vehicles.slice(0, 5))
+  )
+
+  return {
+    data: data || [],
+    isLoading,
+    error,
+  }
+}
+
 export function useVehicleSearch(plate?: string, dateFrom?: string, dateTo?: string) {
   const shouldFetch = Boolean(plate || dateFrom || dateTo)
 

@@ -75,12 +75,12 @@ export default function VehicleEntryDrawer({ open, onClose, onSubmit, employees,
         />
       )}
 
-      {/* Drawer */}
+      {/* Modal */}
       <div className={clsx(
-        'fixed top-0 right-0 z-50 h-full w-full max-w-sm bg-navy-950 border-l border-navy-800',
-        'flex flex-col shadow-[−24px_0_64px_rgba(0,0,0,0.5)]',
-        'transition-transform duration-350 ease-[cubic-bezier(0.16,1,0.3,1)]',
-        open ? 'translate-x-0' : 'translate-x-full'
+        'fixed top-1/2 left-1/2 z-50 w-full max-w-sm bg-navy-950 border border-navy-800 rounded-xl',
+        'flex flex-col shadow-[0_20px_64px_rgba(0,0,0,0.5)]',
+        'transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]',
+        open ? 'scale-100 opacity-100 -translate-x-1/2 -translate-y-1/2' : 'scale-95 opacity-0 -translate-x-1/2 -translate-y-1/2 pointer-events-none'
       )}>
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-navy-800">
@@ -99,7 +99,7 @@ export default function VehicleEntryDrawer({ open, onClose, onSubmit, employees,
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="flex flex-col h-full">
+        <form onSubmit={handleSubmit} className="flex flex-col max-h-[calc(100vh-120px)]">
           <div className="flex-1 overflow-y-auto px-5 py-5 space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <FormInput

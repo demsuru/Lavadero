@@ -3,9 +3,10 @@ import { format, startOfWeek, endOfWeek } from 'date-fns'
 import ReportFilters from '../components/Reports/ReportFilters'
 import RevenueBarChart from '../components/Reports/RevenueBarChart'
 import EmployeeStatsTable from '../components/Reports/EmployeeStatsTable'
+import RecentVehiclesList from '../components/Reports/RecentVehiclesList'
 import VehicleSearchPanel from '../components/Reports/VehicleSearchPanel'
 import StatCard from '../components/Reports/StatCard'
-import { useReportSummary, useRevenueChart, useEmployeeStats } from '../hooks/useReports'
+import { useReportSummary, useRevenueChart, useEmployeeStats, useRecentVehicles } from '../hooks/useReports'
 import { DollarSign, TrendingUp, BarChart3 } from 'lucide-react'
 
 export default function ReportsPage() {
@@ -19,6 +20,7 @@ export default function ReportsPage() {
   const { data: summary, isLoading: summaryLoading } = useReportSummary(startDate, endDate)
   const { data: revenueData, isLoading: revenueLoading } = useRevenueChart(startDate, endDate)
   const { data: employeeData, isLoading: employeeLoading } = useEmployeeStats(startDate, endDate)
+  const { data: recentVehicles, isLoading: recentLoading } = useRecentVehicles(startDate, endDate)
 
   const handleDateChange = (start: string, end: string) => {
     setStartDate(start)
@@ -97,8 +99,14 @@ export default function ReportsPage() {
         </div>
       )}
 
-      {/* Employee Stats */}
-      <EmployeeStatsTable data={employeeData} isLoading={employeeLoading} />
+      {/* Employee Stats + Recent Vehicles Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Left: Employee Stats */}
+        <EmployeeStatsTable data={employeeData} isLoading={employeeLoading} />
+
+        {/* Right: Recent Vehicles */}
+        <RecentVehiclesList data={recentVehicles} isLoading={recentLoading} />
+      </div>
 
       {/* Vehicle Search */}
       <VehicleSearchPanel />
