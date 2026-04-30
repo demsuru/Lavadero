@@ -1,10 +1,9 @@
 import uuid
-from datetime import datetime
+from datetime import date
 from sqlalchemy.ext.asyncio import AsyncSession
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from app.models.employee import EmployeeStatus
 from app.models.wash_type import WashTypeStatus
-from app.models.shift import DayOfWeek
 from app.schemas.vehicle import VehicleCreate
 from app.repositories.vehicle_repository import vehicle_repository
 from app.repositories.employee_repository import employee_repository
@@ -29,9 +28,7 @@ class VehicleService:
             if employee.status != EmployeeStatus.active:
                 raise ValueError("Employee is not active")
 
-            today_name = datetime.now().strftime("%A").lower()
-            today = DayOfWeek(today_name)
-            available = await employee_repository.get_available_today(db, today)
+            available = await employee_repository.get_available_today(db, date.today())
             if not any(e.id == employee_id for e in available):
                 raise ValueError("Employee does not have a shift today")
 
@@ -100,6 +97,43 @@ class VehicleService:
             return await self.repository.get_in_progress(mongo_db)
         except Exception as e:
             raise RuntimeError(f"Error fetching in-progress vehicles: {e}")
+
+    async def update_vehicle(
+        self, db: AsyncSession, mongo_db: AsyncIOMotorDatabase, vehicle_id: str,
+        assigned_employee_id: str | None = None, entry_timestamp: object | None = None
+    ) -> dict:
+        try:
+            updates = {}
+            if assigned_employee_id:
+                employee = await employee_repository.get(db, uuid.UUID(assigned_employee_id))
+                if not employee:
+                    raise ValueError("Employee not found")
+                if employee.status != EmployeeStatus.active:
+                    raise ValueError("Employee is not active")
+                updates["assigned_employee_id"] = assigned_employee_id
+
+            if entry_timestamp:
+                updates["entry_timestamp"] = entry_timestamp
+
+            if not updates:
+                raise ValueError("No fields to update")
+
+            vehicle = await self.repository.update(mongo_db, vehicle_id, updates)
+            if not vehicle:
+                raise ValueError("Vehicle not found or is not in progress")
+            return vehicle
+        except ValueError:
+            raise
+        except Exception as e:
+            raise RuntimeError(f"Error updating vehicle: {e}")
+
+    async def get_completed_today(self, mongo_db: AsyncIOMotorDatabase, target_date: date | None = None) -> list[dict]:
+        try:
+            if target_date is None:
+                target_date = datetime.now().date()
+            return await self.repository.get_completed_today(mongo_db, target_date)
+        except Exception as e:
+            raise RuntimeError(f"Error fetching completed vehicles: {e}")
 
 
 vehicle_service = VehicleService()

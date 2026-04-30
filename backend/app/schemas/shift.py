@@ -1,13 +1,12 @@
 import uuid
-from datetime import time, datetime
+from datetime import date, time, datetime
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, model_validator
-from app.models.shift import DayOfWeek
 
 
 class ShiftCreate(BaseModel):
     employee_id: uuid.UUID
-    day_of_week: DayOfWeek
+    shift_date: date
     start_time: time
     end_time: time
 
@@ -19,7 +18,7 @@ class ShiftCreate(BaseModel):
 
 
 class ShiftUpdate(BaseModel):
-    day_of_week: Optional[DayOfWeek] = None
+    shift_date: Optional[date] = None
     start_time: Optional[time] = None
     end_time: Optional[time] = None
 
@@ -29,7 +28,7 @@ class ShiftRead(BaseModel):
 
     id: uuid.UUID
     employee_id: uuid.UUID
-    day_of_week: DayOfWeek
+    shift_date: date
     start_time: time
     end_time: time
     created_at: datetime

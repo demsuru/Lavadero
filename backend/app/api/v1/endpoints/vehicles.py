@@ -4,7 +4,7 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from app.api.dependencies import get_db, get_mongo_db, require_manager_or_above
 from app.models.employee import Employee
-from app.schemas.vehicle import VehicleCreate, VehicleRead, VehicleExitRead
+from app.schemas.vehicle import VehicleCreate, VehicleRead, VehicleExitRead, VehicleUpdate
 from app.services.vehicle_service import vehicle_service
 
 router = APIRouter()
@@ -60,6 +60,22 @@ async def get_vehicle(
         return await vehicle_service.get_vehicle(mongo_db, vehicle_id)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+    except RuntimeError as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.put("/{vehicle_id}", response_model=VehicleRead)
+async def update_vehicle(
+    vehicle_id: str,
+    data: VehicleUpdate,
+    db: AsyncSession = Depends(get_db),
+    mongo_db: AsyncIOMotorDatabase = Depends(get_mongo_db),
+    _: Employee = Depends(require_manager_or_above),
+):
+    try:
+        return await vehicle_service.update_vehicle(db, mongo_db, vehicle_id, data.assigned_employee_id, data.entry_timestamp)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except RuntimeError as e:
         raise HTTPException(status_code=500, detail=str(e))
 

@@ -33,7 +33,7 @@ export interface EmployeeUpdate {
 export interface Shift {
   id: string
   employee_id: string
-  day_of_week: DayOfWeek
+  shift_date: string
   start_time: string
   end_time: string
   created_at: string
@@ -42,7 +42,7 @@ export interface Shift {
 
 export interface ShiftCreate {
   employee_id: string
-  day_of_week: DayOfWeek
+  shift_date: string
   start_time: string
   end_time: string
 }
@@ -71,7 +71,7 @@ export interface WashTypeUpdate {
 }
 
 export interface Vehicle {
-  _id: string
+  id: string
   plate: string
   brand: string
   customer_name: string
@@ -128,4 +128,37 @@ export interface TokenResponse {
 export interface LoginCredentials {
   email: string
   password: string
+}
+
+export interface PeriodSummary {
+  total_revenue: number
+  total_vehicles: number
+  avg_per_vehicle: number
+  start_date: string
+  end_date: string
+}
+
+export interface DailyRevenue {
+  day: string
+  revenue: number
+  count: number
+}
+
+export interface EmployeeStats {
+  employee_id: string
+  employee_name: string
+  total_cars: number
+  total_revenue: number
+}
+
+export interface VehicleSearchResult {
+  id: string
+  plate: string
+  brand: string
+  customer_name: string
+  customer_phone: string | null
+  entry_timestamp: string
+  exit_timestamp: string | null
+  status: VehicleStatus
+  wash_type_id: string
 }

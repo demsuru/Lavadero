@@ -1,15 +1,15 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Car, Users, Calendar, Droplets, ChevronRight, LogOut } from 'lucide-react'
+import { LayoutDashboard, Users, Calendar, Droplets, ChevronRight, LogOut, BarChart3 } from 'lucide-react'
 import clsx from 'clsx'
 import { useAuth } from '../../context/AuthContext'
 import { ROLE_LABELS } from '../../utils/formatters'
 
 const navItems = [
   { to: '/',           label: 'Dashboard',       icon: LayoutDashboard },
-  { to: '/vehicles',   label: 'Vehículos',       icon: Car },
   { to: '/employees',  label: 'Empleados',       icon: Users },
   { to: '/shifts',     label: 'Turnos',          icon: Calendar },
   { to: '/wash-types', label: 'Tipos de Lavado', icon: Droplets },
+  { to: '/reports',    label: 'Reportes',        icon: BarChart3, requiresAdmin: true },
 ]
 
 export default function Sidebar() {
@@ -42,7 +42,9 @@ export default function Sidebar() {
 
       {/* Nav */}
       <nav className="flex-1 px-3 py-4 space-y-0.5">
-        {navItems.map(({ to, label, icon: Icon }) => (
+        {navItems
+          .filter((item) => !item.requiresAdmin || (user?.role === 'admin' || user?.role === 'superadmin'))
+          .map(({ to, label, icon: Icon }) => (
           <NavLink
             key={to}
             to={to}

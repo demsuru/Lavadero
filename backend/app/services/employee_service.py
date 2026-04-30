@@ -1,8 +1,7 @@
 import uuid
-from datetime import datetime
+from datetime import date
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.security import hash_password
-from app.models.shift import DayOfWeek
 from app.models.employee import Employee, EmployeeRole, LOGIN_ROLES
 from app.schemas.employee import EmployeeCreate, EmployeeUpdate
 from app.repositories.employee_repository import employee_repository
@@ -103,9 +102,7 @@ class EmployeeService:
 
     async def get_available_today(self, db: AsyncSession) -> list[Employee]:
         try:
-            today_name = datetime.now().strftime("%A").lower()
-            today = DayOfWeek(today_name)
-            return await self.repository.get_available_today(db, today)
+            return await self.repository.get_available_today(db, date.today())
         except Exception as e:
             raise RuntimeError(f"Error fetching available employees: {e}")
 

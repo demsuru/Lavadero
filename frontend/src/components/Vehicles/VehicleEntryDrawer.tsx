@@ -54,6 +54,9 @@ export default function VehicleEntryDrawer({ open, onClose, onSubmit, employees,
       })
       setForm(empty)
       onClose()
+    } catch (err) {
+      console.error('Vehicle entry error:', err)
+      setErrors({ plate: err instanceof Error ? err.message : 'Error registrando entrada' })
     } finally {
       setLoading(false)
     }
@@ -72,12 +75,12 @@ export default function VehicleEntryDrawer({ open, onClose, onSubmit, employees,
         />
       )}
 
-      {/* Drawer */}
+      {/* Modal */}
       <div className={clsx(
-        'fixed top-0 right-0 z-50 h-full w-full max-w-sm bg-navy-950 border-l border-navy-800',
-        'flex flex-col shadow-[−24px_0_64px_rgba(0,0,0,0.5)]',
-        'transition-transform duration-350 ease-[cubic-bezier(0.16,1,0.3,1)]',
-        open ? 'translate-x-0' : 'translate-x-full'
+        'fixed top-1/2 left-1/2 z-50 w-full max-w-sm bg-navy-950 border border-navy-800 rounded-xl',
+        'flex flex-col shadow-[0_20px_64px_rgba(0,0,0,0.5)]',
+        'transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]',
+        open ? 'scale-100 opacity-100 -translate-x-1/2 -translate-y-1/2' : 'scale-95 opacity-0 -translate-x-1/2 -translate-y-1/2 pointer-events-none'
       )}>
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-navy-800">
@@ -96,88 +99,90 @@ export default function VehicleEntryDrawer({ open, onClose, onSubmit, employees,
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-5 py-5 space-y-4">
-          <div className="grid grid-cols-2 gap-3">
+        <form onSubmit={handleSubmit} className="flex flex-col max-h-[calc(100vh-120px)]">
+          <div className="flex-1 overflow-y-auto px-5 py-5 space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <FormInput
+                label="Patente"
+                placeholder="ABC123"
+                value={form.plate}
+                onChange={set('plate')}
+                error={errors.plate}
+                className="uppercase"
+              />
+              <FormInput
+                label="Marca"
+                placeholder="Toyota"
+                value={form.brand}
+                onChange={set('brand')}
+                error={errors.brand}
+              />
+            </div>
+
             <FormInput
-              label="Patente"
-              placeholder="ABC123"
-              value={form.plate}
-              onChange={set('plate')}
-              error={errors.plate}
-              className="uppercase"
+              label="Nombre del cliente"
+              placeholder="Juan Pérez"
+              value={form.customer_name}
+              onChange={set('customer_name')}
+              error={errors.customer_name}
             />
+
             <FormInput
-              label="Marca"
-              placeholder="Toyota"
-              value={form.brand}
-              onChange={set('brand')}
-              error={errors.brand}
+              label="Teléfono (opcional)"
+              placeholder="+54 9 11 1234-5678"
+              value={form.customer_phone ?? ''}
+              onChange={set('customer_phone')}
+              type="tel"
+            />
+
+            <FormSelect
+              label="Empleado asignado"
+              value={form.assigned_employee_id}
+              onChange={set('assigned_employee_id')}
+              error={errors.assigned_employee_id}
+            >
+              <option value="">— Seleccioná un empleado —</option>
+              {activeEmployees.map(e => (
+                <option key={e.id} value={e.id}>{e.name}</option>
+              ))}
+            </FormSelect>
+
+            <FormSelect
+              label="Tipo de lavado"
+              value={form.wash_type_id}
+              onChange={set('wash_type_id')}
+              error={errors.wash_type_id}
+            >
+              <option value="">— Seleccioná el tipo —</option>
+              {activeWashTypes.map(w => (
+                <option key={w.id} value={w.id}>{w.name} — ${w.price.toLocaleString('es-AR')}</option>
+              ))}
+            </FormSelect>
+
+            <FormTextarea
+              label="Notas (opcional)"
+              placeholder="Observaciones sobre el vehículo..."
+              value={form.notes ?? ''}
+              onChange={set('notes')}
             />
           </div>
 
-          <FormInput
-            label="Nombre del cliente"
-            placeholder="Juan Pérez"
-            value={form.customer_name}
-            onChange={set('customer_name')}
-            error={errors.customer_name}
-          />
-
-          <FormInput
-            label="Teléfono (opcional)"
-            placeholder="+54 9 11 1234-5678"
-            value={form.customer_phone ?? ''}
-            onChange={set('customer_phone')}
-            type="tel"
-          />
-
-          <FormSelect
-            label="Empleado asignado"
-            value={form.assigned_employee_id}
-            onChange={set('assigned_employee_id')}
-            error={errors.assigned_employee_id}
-          >
-            <option value="">— Seleccioná un empleado —</option>
-            {activeEmployees.map(e => (
-              <option key={e.id} value={e.id}>{e.name}</option>
-            ))}
-          </FormSelect>
-
-          <FormSelect
-            label="Tipo de lavado"
-            value={form.wash_type_id}
-            onChange={set('wash_type_id')}
-            error={errors.wash_type_id}
-          >
-            <option value="">— Seleccioná el tipo —</option>
-            {activeWashTypes.map(w => (
-              <option key={w.id} value={w.id}>{w.name} — ${w.price.toLocaleString('es-AR')}</option>
-            ))}
-          </FormSelect>
-
-          <FormTextarea
-            label="Notas (opcional)"
-            placeholder="Observaciones sobre el vehículo..."
-            value={form.notes ?? ''}
-            onChange={set('notes')}
-          />
+          {/* Footer */}
+          <div className="px-5 py-4 border-t border-navy-800 flex gap-2">
+            <Button variant="secondary" className="flex-1 justify-center" onClick={onClose}>
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              className="flex-1 justify-center"
+              icon={<Plus size={15} />}
+              loading={loading}
+            >
+              Registrar entrada
+            </Button>
+          </div>
         </form>
-
-        {/* Footer */}
-        <div className="px-5 py-4 border-t border-navy-800 flex gap-2">
-          <Button variant="secondary" className="flex-1 justify-center" onClick={onClose}>
-            Cancelar
-          </Button>
-          <Button
-            variant="primary"
-            className="flex-1 justify-center"
-            icon={<Plus size={15} />}
-            loading={loading}
-            onClick={(e) => handleSubmit(e as any)}
-          >
-            Registrar entrada
-          </Button>
-        </div>
       </div>
     </>
   )

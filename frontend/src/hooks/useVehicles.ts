@@ -17,8 +17,24 @@ export function useVehiclesInProgress() {
 
   const exitVehicle = async (id: string) => {
     const updated = await vehicleService.registerExit(id)
-    mutate()
+    // Revalidate to fetch fresh list (will exclude completed vehicles)
+    await mutate()
     return updated
+  }
+
+  const updateVehicle = async (id: string, updates: { assigned_employee_id?: string; entry_timestamp?: string }) => {
+    try {
+      console.log('useVehicles.updateVehicle called:', { id, updates })
+      const updated = await vehicleService.update(id, updates)
+      console.log('vehicleService.update result:', updated)
+      console.log('Calling mutate() to refresh data...')
+      await mutate()
+      console.log('Data refreshed')
+      return updated
+    } catch (err) {
+      console.error('useVehicles.updateVehicle error:', err)
+      throw err
+    }
   }
 
   return {
@@ -27,6 +43,7 @@ export function useVehiclesInProgress() {
     error,
     enterVehicle,
     exitVehicle,
+    updateVehicle,
     refresh: mutate,
   }
 }

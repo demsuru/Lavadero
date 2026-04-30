@@ -28,6 +28,11 @@ class VehicleRead(BaseModel):
     created_at: datetime
 
 
+class VehicleUpdate(BaseModel):
+    assigned_employee_id: Optional[str] = None
+    entry_timestamp: Optional[datetime] = None
+
+
 class VehicleExitRead(BaseModel):
     vehicle: VehicleRead
     transaction_id: str

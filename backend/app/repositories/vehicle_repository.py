@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date
 from typing import Optional
 from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorDatabase
@@ -61,6 +61,40 @@ class VehicleRepository:
             return_document=True,
         )
         return _serialize(result) if result else None
+
+    async def update(self, db: AsyncIOMotorDatabase, vehicle_id: str, updates: dict) -> Optional[dict]:
+        result = await self._col(db).find_one_and_update(
+            {"_id": ObjectId(vehicle_id), "status": "in_progress"},
+            {"$set": updates},
+            return_document=True,
+        )
+        return _serialize(result) if result else None
+
+    async def get_completed_today(self, db: AsyncIOMotorDatabase, target_date: date) -> list[dict]:
+        """Get all completed vehicles for a specific date."""
+        start_of_day = datetime.combine(target_date, datetime.min.time()).replace(tzinfo=timezone.utc)
+        end_of_day = datetime.combine(target_date, datetime.max.time()).replace(tzinfo=timezone.utc)
+
+        cursor = self._col(db).find({
+            "status": "completed",
+            "exit_timestamp": {"$gte": start_of_day, "$lte": end_of_day}
+        })
+        return [_serialize(doc) async for doc in cursor]
+
+    async def search(self, db: AsyncIOMotorDatabase, plate: Optional[str] = None, date_from: Optional[date] = None, date_to: Optional[date] = None) -> list[dict]:
+        """Search vehicles by plate or date range."""
+        query = {}
+
+        if plate:
+            query["plate"] = {"$regex": plate.upper(), "$options": "i"}
+
+        if date_from and date_to:
+            start_of_day = datetime.combine(date_from, datetime.min.time()).replace(tzinfo=timezone.utc)
+            end_of_day = datetime.combine(date_to, datetime.max.time()).replace(tzinfo=timezone.utc)
+            query["entry_timestamp"] = {"$gte": start_of_day, "$lte": end_of_day}
+
+        cursor = self._col(db).find(query) if query else self._col(db).find({})
+        return [_serialize(doc) async for doc in cursor]
 
 
 vehicle_repository = VehicleRepository()

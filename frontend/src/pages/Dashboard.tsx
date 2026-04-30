@@ -1,37 +1,62 @@
 import { useState } from 'react'
-import { Car, CheckCircle, DollarSign, Users, RefreshCw } from 'lucide-react'
+import { Car, CheckCircle, DollarSign, Users, RefreshCw, Plus } from 'lucide-react'
 import { useVehiclesInProgress } from '../hooks/useVehicles'
-import { useEmployees } from '../hooks/useEmployees'
+import { useAvailableEmployees } from '../hooks/useEmployees'
 import { useWashTypes } from '../hooks/useWashTypes'
+import { useDashboardTodayStats } from '../hooks/useDashboard'
 import StatCard from '../components/Dashboard/StatCard'
 import VehicleProgressCard from '../components/Dashboard/VehicleProgressCard'
+import VehicleEntryDrawer from '../components/Vehicles/VehicleEntryDrawer'
+import VehicleEditModal from '../components/Vehicles/VehicleEditModal'
 import ConfirmDialog from '../components/common/ConfirmDialog'
 import SkeletonCard from '../components/common/SkeletonCard'
 import Button from '../components/common/Button'
 import { formatCurrency } from '../utils/formatters'
+import type { Vehicle } from '../types'
 
 export default function Dashboard() {
-  const { vehicles, isLoading, exitVehicle, refresh } = useVehiclesInProgress()
-  const { employees } = useEmployees()
+  const { vehicles, isLoading, enterVehicle, exitVehicle, updateVehicle, refresh } = useVehiclesInProgress()
+  const { employees } = useAvailableEmployees()
   const { washTypes } = useWashTypes()
+  const { completedCount, revenueToday, refresh: refreshDashboard } = useDashboardTodayStats()
 
+  const [entryDrawerOpen, setEntryDrawerOpen] = useState(false)
   const [exitTarget, setExitTarget] = useState<string | null>(null)
   const [exitLoading, setExitLoading] = useState(false)
+  const [exitError, setExitError] = useState<string | null>(null)
 
-  const completedToday = 0
-  const revenueToday = vehicles.reduce((acc, v) => {
-    const wt = washTypes.find(w => w.id === v.wash_type_id)
-    return acc + (wt?.price ?? 0)
-  }, 0)
+  const [editTarget, setEditTarget] = useState<Vehicle | null>(null)
+  const [editModalOpen, setEditModalOpen] = useState(false)
 
   const handleConfirmExit = async () => {
     if (!exitTarget) return
     setExitLoading(true)
+    setExitError(null)
     try {
       await exitVehicle(exitTarget)
+      setExitTarget(null)
+      refreshDashboard()
+    } catch (err) {
+      console.error('Exit vehicle error:', err)
+      setExitError(err instanceof Error ? err.message : 'Error al registrar salida')
     } finally {
       setExitLoading(false)
-      setExitTarget(null)
+    }
+  }
+
+  const handleEditVehicle = (vehicle: Vehicle) => {
+    setEditTarget(vehicle)
+    setEditModalOpen(true)
+  }
+
+  const handleUpdateVehicle = async (vehicleId: string, data: { assigned_employee_id?: string; entry_timestamp?: string }) => {
+    try {
+      console.log('handleUpdateVehicle called:', { vehicleId, data })
+      const result = await updateVehicle(vehicleId, data)
+      console.log('updateVehicle result:', result)
+    } catch (err) {
+      console.error('handleUpdateVehicle error:', err)
+      throw err
     }
   }
 
@@ -49,14 +74,22 @@ export default function Dashboard() {
             {now.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}
           </p>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          icon={<RefreshCw size={14} />}
-          onClick={() => refresh()}
-        >
-          Actualizar
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            icon={<Plus size={14} />}
+            onClick={() => setEntryDrawerOpen(true)}
+          >
+            Nueva entrada
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={<RefreshCw size={14} />}
+            onClick={() => refresh()}
+          >
+            Actualizar
+          </Button>
+        </div>
       </div>
 
       {/* Stats */}
@@ -70,7 +103,7 @@ export default function Dashboard() {
         />
         <StatCard
           label="Completados hoy"
-          value={completedToday}
+          value={completedCount}
           icon={<CheckCircle size={20} />}
           color="green"
           subtitle="lavados terminados"
@@ -118,27 +151,52 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {vehicles.map(vehicle => (
               <VehicleProgressCard
-                key={vehicle._id}
+                key={vehicle.id}
                 vehicle={vehicle}
                 employee={employees.find(e => e.id === vehicle.assigned_employee_id)}
                 washType={washTypes.find(w => w.id === vehicle.wash_type_id)}
-                onExit={setExitTarget}
-                exitLoading={exitLoading && exitTarget === vehicle._id}
+                onExit={(id) => setExitTarget(id)}
+                onEdit={handleEditVehicle}
+                exitLoading={exitLoading && exitTarget === vehicle.id}
               />
             ))}
           </div>
         )}
       </div>
 
+      <VehicleEntryDrawer
+        open={entryDrawerOpen}
+        onClose={() => setEntryDrawerOpen(false)}
+        onSubmit={async (data) => {
+          await enterVehicle(data)
+          setEntryDrawerOpen(false)
+          refreshDashboard()
+        }}
+        employees={employees}
+        washTypes={washTypes}
+      />
+
+      <VehicleEditModal
+        open={editModalOpen}
+        onClose={() => {
+          setEditModalOpen(false)
+          setEditTarget(null)
+        }}
+        onSubmit={handleUpdateVehicle}
+        vehicleId={editTarget?.id}
+        vehicle={editTarget}
+        employees={employees}
+      />
+
       <ConfirmDialog
         open={!!exitTarget}
-        onClose={() => setExitTarget(null)}
+        onClose={() => { setExitTarget(null); setExitError(null) }}
         onConfirm={handleConfirmExit}
         title="Registrar salida"
-        description="¿Confirmás la salida de este vehículo? Se generará la transacción automáticamente."
+        description={exitError ? exitError : "¿Confirmás la salida de este vehículo? Se generará la transacción automáticamente."}
         confirmLabel="Sí, registrar salida"
         loading={exitLoading}
-        variant="warning"
+        variant={exitError ? "danger" : "warning"}
       />
     </div>
   )

@@ -1,30 +1,23 @@
-import enum
 import uuid
-from datetime import time
-from sqlalchemy import Time, Enum as SAEnum, ForeignKey
+from datetime import date, time
+from sqlalchemy import Time, ForeignKey, Date, Index
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.base import Base, UUIDMixin, TimestampMixin
-
-
-class DayOfWeek(str, enum.Enum):
-    monday = "monday"
-    tuesday = "tuesday"
-    wednesday = "wednesday"
-    thursday = "thursday"
-    friday = "friday"
-    saturday = "saturday"
-    sunday = "sunday"
 
 
 class Shift(Base, UUIDMixin, TimestampMixin):
     __tablename__ = "shifts"
 
     employee_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("employees.id"), nullable=False
+        UUID(as_uuid=True), ForeignKey("employees.id"), nullable=False, index=True
     )
-    day_of_week: Mapped[DayOfWeek] = mapped_column(SAEnum(DayOfWeek), nullable=False)
+    shift_date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
     start_time: Mapped[time] = mapped_column(Time, nullable=False)
     end_time: Mapped[time] = mapped_column(Time, nullable=False)
 
     employee: Mapped["Employee"] = relationship("Employee", back_populates="shifts")
+
+    __table_args__ = (
+        Index("ix_shifts_employee_date", "employee_id", "shift_date"),
+    )
