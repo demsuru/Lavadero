@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Car, Users, Calendar, Droplets, ChevronRight, LogOut, BarChart3 } from 'lucide-react'
+import { LayoutDashboard, Users, Calendar, Droplets, ChevronRight, LogOut, BarChart3 } from 'lucide-react'
 import clsx from 'clsx'
 import { useAuth } from '../../context/AuthContext'
 import { ROLE_LABELS } from '../../utils/formatters'
