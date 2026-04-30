@@ -19,4 +19,7 @@ export const reportsService = {
         ...(dateTo && { date_to: dateTo }),
       },
     }).then(r => r.data),
+
+  downloadInvoice: (vehicleId: string): Promise<Blob> =>
+    api.get(`/invoices/vehicle/${vehicleId}`, { responseType: 'blob' }).then(r => r.data),
 }

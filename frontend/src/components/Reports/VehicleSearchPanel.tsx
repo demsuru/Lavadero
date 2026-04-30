@@ -1,6 +1,8 @@
 import { useState } from 'react'
-import { Search } from 'lucide-react'
+import { Search, Download } from 'lucide-react'
 import { useVehicleSearch } from '../../hooks/useReports'
+import { reportsService } from '../../services/reportsService'
+import Button from '../common/Button'
 import type { VehicleSearchResult } from '../../types/reports'
 
 export default function VehicleSearchPanel() {
@@ -13,6 +15,20 @@ export default function VehicleSearchPanel() {
     dateFrom?: string
     dateTo?: string
   } | null>(null)
+
+  const handleDownloadInvoice = async (vehicleId: string, vehiclePlate: string) => {
+    try {
+      const blob = await reportsService.downloadInvoice(vehicleId)
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `factura-${vehiclePlate}.pdf`
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch (err) {
+      console.error('Error downloading invoice:', err)
+    }
+  }
 
   const { data, isLoading } = useVehicleSearch(
     searchParams?.plate,
@@ -162,6 +178,9 @@ export default function VehicleSearchPanel() {
                     <th className="px-4 py-3 text-left text-sm font-semibold text-navy-100">
                       Estado
                     </th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-navy-100">
+                      Factura
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -199,6 +218,17 @@ export default function VehicleSearchPanel() {
                         >
                           {vehicle.status === 'completed' ? 'Completado' : 'En progreso'}
                         </span>
+                      </td>
+                      <td className="px-4 py-3 text-sm">
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          icon={<Download size={13} />}
+                          onClick={() => handleDownloadInvoice(vehicle.id, vehicle.plate)}
+                          disabled={vehicle.status !== 'completed'}
+                        >
+                          PDF
+                        </Button>
                       </td>
                     </tr>
                   ))}

@@ -1,4 +1,6 @@
-import { Clock, Car } from 'lucide-react'
+import { Clock, Car, Download } from 'lucide-react'
+import { reportsService } from '../../services/reportsService'
+import Button from '../common/Button'
 import type { VehicleSearchResult } from '../../types/reports'
 
 interface Props {
@@ -7,6 +9,20 @@ interface Props {
 }
 
 export default function RecentVehiclesList({ data, isLoading }: Props) {
+  const handleDownloadInvoice = async (vehicleId: string, plate: string) => {
+    try {
+      const blob = await reportsService.downloadInvoice(vehicleId)
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `factura-${plate}.pdf`
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch (err) {
+      console.error('Error downloading invoice:', err)
+    }
+  }
+
   const calculateDuration = (entry: string, exit?: string) => {
     if (!exit) return 'En progreso'
     const entryDate = new Date(entry)
@@ -77,9 +93,20 @@ export default function RecentVehiclesList({ data, isLoading }: Props) {
                     {vehicle.status === 'completed' ? 'OK' : 'En prog'}
                   </span>
                 </div>
-                <p className="text-xs text-navy-300 mt-1.5">
-                  {calculateDuration(vehicle.entry_timestamp, vehicle.exit_timestamp)}
-                </p>
+                <div className="flex items-center justify-between gap-2 mt-2">
+                  <p className="text-xs text-navy-300">
+                    {calculateDuration(vehicle.entry_timestamp, vehicle.exit_timestamp)}
+                  </p>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    icon={<Download size={13} />}
+                    onClick={() => handleDownloadInvoice(vehicle.id, vehicle.plate)}
+                    disabled={vehicle.status !== 'completed'}
+                  >
+                    Factura
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
